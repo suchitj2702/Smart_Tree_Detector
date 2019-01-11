@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  mongo:
+    image: 'mongo:3.4.1'
+    ports:
+      - '27017:27017'
+    volumes:
+      - 'mongo-db:/data/db'
+  
+  react:
+    image: 'node:10.15.0'
+    entrypoint: app/entrypoint.sh
+    command: npm start
+    ports: 
+      - '80:3000'
+    volumes:
+      - './react:/app'
+
+  flask:
+    depends_on:
+      - 'mongo'
+    image: 'python:3.6.8'
+    entrypoint: app/entrypoint.sh
+    command: flask run --host=0.0.0.0 --port=5000
+    ports:
+      - '5000:5000'
+    volumes:
+      - './flask:/app'
+volumes:
+  mongo-db:
