@@ -6,7 +6,6 @@ from flask_pymongo import PyMongo
 # Config
 UPLOAD_FOLDER = "uploads"
 MAX_CONTENT_IN_MB = 16
-MONGO_URI = "mongodb+srv://app:pass1234@freecluster-xhahv.mongodb.net/treeSeg?retryWrites=true"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 # Helper Functions
@@ -22,10 +21,10 @@ def processImage(path):
     pass
 
 # Setup Flask App and PyMongo
-app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_IN_MB * 1024 * 1024
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config["MONGO_URI"] = MONGO_URI
+app = Flask(__name__, static_folder=None)
+app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_IN_MB * 1024 * 1024
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MONGO_URI"] = "mongodb://mongo:27017/tree-seg"
 CORS(app)
 mongo = PyMongo(app)
 
@@ -74,11 +73,17 @@ def upload():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-     path_dir = os.path.abspath("./react/build") # path to react build files
-     if path != "" and os.path.exists(os.path.join(path_dir, path)):
-         return send_from_directory(os.path.join(path_dir), path)
-     else:
-         return send_from_directory(os.path.join(path_dir),'index.html')
+    path_dir = os.path.abspath("./react") # path to react build files
+    if path != "" and os.path.exists(os.path.join(path_dir, path)):
+        filename = path
+        relativePath = ""
+        splitList = path.rsplit("/", 1)
+        if len(splitList) > 1:
+            filename = splitList[1]
+            relativePath = splitList[0]
+        return send_from_directory(os.path.join(path_dir, relativePath), filename)
+    else:
+        return send_from_directory(os.path.join(path_dir),'index.html')
 
 # MAIN
 if __name__ == "__main__":

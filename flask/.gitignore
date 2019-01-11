@@ -103,5 +103,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# uploads
+uploads/**
+!uploads/README.md
+
 # virtualenv
 ENV/
