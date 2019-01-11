@@ -1,45 +1,19 @@
-# Server
-A Flask based server for the tree-seg project
+# Tree Segmentation App
+A web-app based on Flask-React stack for segmenting trees from images
 
 ## Dependencies
-Requires following python packages to be installed:  
-1. virtualenv
-## Cloning Repository
-**Linux/Mac**
-```console
-foo@bar:~$ git clone <current repo link>
-foo@bar:~$ git checkout server
-```
-
-## Installation
-**Linux/Mac**
-```console
-foo@bar:~$ chmod +x install.bash
-foo@bar:~$ ./install.bash
-```
+1. Linux/Mac
+2. Docker
 
 ## Running Server
 **Linux/Mac**
 ```console
-foo@bar:~$ source ENV/bin/activate
-(ENV) foo@bar:~$ gunicorn --bind 0.0.0.0:5000 wsgi:app
-```
-
-## Updating Requirements
-**Linux/Mac**
-```console
-foo@bar:~$ source ENV/bin/activate
-(ENV) foo@bar:~$ pip install <new-requirement>
-(ENV) foo@bar:~$ pip freeze > requirements.txt
+foo@bar:~$ sudo docker-compose up
 ```
 
 ## Stopping Server
 **Linux/Mac**  
-Use ```Ctrl+C``` followed by:
-```console
-(ENV) foo@bar:~$ deactivate
-```
+Use ```Ctrl+C```
 
 ## Notes
 1. Always use ```Ctrl + C``` and not ```Ctrl + X```
-2. Always commit only after updating requirements
