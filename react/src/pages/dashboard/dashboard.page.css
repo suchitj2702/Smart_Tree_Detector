@@ -1,0 +1,28 @@
+.Dashboard {
+  background-image: url("../../assets/prism.png");
+  min-height: 100vh;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.Dashboard-menu {
+  width: 60vw!important;
+  padding: 5px 0 0 5px;
+}
+
+.Dashboard-segment {
+  width: 60vw!important ;
+  height: 75vh!important;
+}
+
+.Upload-text {
+  margin-top: 10px;
+}
+
+.Filepond-custom {
+  height: 300px;
+  margin-top: 10px;
+}

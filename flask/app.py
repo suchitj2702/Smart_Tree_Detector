@@ -1,4 +1,4 @@
-import os, time
+import os, stat, time
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_pymongo import PyMongo
@@ -35,6 +35,43 @@ mongo = PyMongo(app)
 def health():
     return jsonify(online=True)  
 
+## Sign Up User
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    email = data["email"]
+    password = data["password"]
+    user = mongo.db.users.find_one({"email": email})
+    if user != None:
+        return jsonify(success=False, error="Email is registered")
+    mongo.db.users.insert_one({"email": email, "password": password})
+    return jsonify(success=True)
+
+## Sign In User
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data["email"]
+    password = data["password"]
+    user = mongo.db.users.find_one({"email": email})
+    if user == None:
+        return jsonify(success=False, error="Email not registered")
+    if user["password"] != password:
+        return jsonify(success=False, error="Incorrect Password")
+    return jsonify(success=True)
+
+## Change Password
+@app.route('/api/password', methods=['POST'])
+def changePassword():
+    data = request.get_json()
+    email = data["email"]
+    oldPassword = data["old"]
+    newPassword = data["new"]
+    user = mongo.db.users.find_one_and_update({'email': email, 'password': oldPassword}, {'$set': {'password': newPassword}})
+    if user == None:
+        return jsonify(success=False, error="Incorrect Password")
+    return jsonify(success=True)
+
 ## Fetch list of uploads
 @app.route('/api/list', methods=['POST'])
 def listUploads():
@@ -52,22 +89,30 @@ def fetchUpload():
     return jsonify(data=uploadData)
 
 ## Upload an image
-@app.route('/api/upload', methods=['POST'])
+@app.route('/api/upload', methods=['POST', 'DELETE'])
 def upload():
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        return jsonify(success=False, error="The request doesn't include the required file part")
-    file = request.files['file']
-    # if user does not select file, browser also
-    # submit an empty part without filename
-    if file.filename == '':
-        return jsonify(success=False, error="No file Selected")
-    if file and allowedFile(file.filename):
-        filename = renameAndKeepExtension(file.filename, str(int(time.time())))
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        # Start processing in another process
-        return jsonify(success=True)
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'filepond' not in request.files:
+            return jsonify(success=False, error="The request doesn't include the required file part")
+        file = request.files['filepond']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            return jsonify(success=False, error="No file Selected")
+        if file and allowedFile(file.filename):
+            filename = renameAndKeepExtension(file.filename, str(int(time.time())))
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            os.chmod(filepath, stat.S_IRWXO)
+            return filename
+    elif request.method == 'DELETE':
+        filename = request.get_data().decode('utf-8')
+        path_dir = path_dir = os.path.abspath("./")
+        filepath = os.path.join(path_dir, app.config['UPLOAD_FOLDER'], filename)
+        app.logger.info(filepath)
+        os.remove(filepath)
+        return 'Done'
 
 ## ReactJS app serving
 @app.route('/', defaults={'path': ''})

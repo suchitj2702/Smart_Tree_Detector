@@ -7,4 +7,6 @@ cd /app
 pipreqs --force .
 pip install -r requirements.txt
 
+export FLASK_ENV=development
+
 exec "$@"
