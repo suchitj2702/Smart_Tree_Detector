@@ -4,7 +4,7 @@ import './dashboard.page.css';
 import { getUploadLink } from '../../http.services'
 
 // Semantic-UI elements
-import { Segment, Button, Dropdown, Menu, Header, Icon, Modal, Input, TextArea, Form, Label } from 'semantic-ui-react';
+import { Segment, Button, Dropdown, Menu, Header, Icon, Modal, Input, TextArea, Form, Label, Checkbox } from 'semantic-ui-react';
 
 // Filepond
 import { FilePond, File, registerPlugin } from 'react-filepond';
@@ -21,7 +21,7 @@ registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
 class DashboardPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {error: null, errorVisibility: false, loading: false};
+    this.state = {error: null, errorVisibility: false, loading: false, toggle: [true, false]};
   }
 
   handleInputChange = (maxlength, event) => {
@@ -33,6 +33,20 @@ class DashboardPage extends Component {
         [name]: value
       });
     }
+  }
+
+  handleToggles = (toggleId) => {
+    const toggleCollection = this.state.toggle;
+    toggleCollection[toggleId] = !toggleCollection[toggleId]
+    if (toggleCollection[0] || toggleCollection[1]) {
+      this.setState({
+        toggle: toggleCollection
+      });
+    }
+  }
+
+  handleSubmission = () => {
+    console.log(this.state);
   }
 
   handleLogout = () => {
@@ -62,9 +76,15 @@ class DashboardPage extends Component {
                   <Form className='Upload-text'>
                     <Label>Description</Label>
                     <TextArea name='description' placeholder='Give us a brief description [optional]' value={this.state.description} onChange={this.handleInputChange.bind(this, 250)} />
+                    <Form.Field>
+                      <Checkbox toggle label='Trees' checked={this.state.toggle[0]} onChange={this.handleToggles.bind(this, 0)}/>
+                    </Form.Field>
+                    <Form.Field>
+                      <Checkbox toggle label='Buildings' checked={this.state.toggle[1]} onChange={this.handleToggles.bind(this, 1)}/>
+                    </Form.Field>
                   </Form>
                   <FilePond className="Filepond-custom" allowMultiple={false} maxFiles={1} server={getUploadLink()}/>
-                  <Button content='Submit' primary/>
+                  <Button content='Submit' primary onClick={this.handleSubmission}/>
                 </Modal.Description>
               </Modal.Content>
             </Modal>

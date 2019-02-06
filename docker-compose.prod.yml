@@ -1,18 +1,24 @@
 version: '3'
 
 services:
-  mongo:
-    image: 'mongo:3.4.1'
+  database:
+    image: 'postgres:11'
     ports:
-      - '27017:27017'
+      - '5432:5432'
     volumes:
-      - 'mongo-db:/data/db'
+      - 'db:/var/lib/postgresql/data'
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=pass1234
+      - POSTGRES_DB=tree-seg
 
   flask:
     depends_on:
-      - 'mongo'
+      - 'database'
     build: .
+    restart: unless-stopped
     ports:
       - '80:5000'
+
 volumes:
-  mongo-db:
+  db:

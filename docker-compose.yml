@@ -1,12 +1,16 @@
 version: '3'
 
 services:
-  mongo:
-    image: 'mongo:3.4.1'
+  database:
+    image: 'postgres:11'
     ports:
-      - '27017:27017'
+      - '5432:5432'
     volumes:
-      - 'mongo-db:/data/db'
+      - 'db:/var/lib/postgresql/data'
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=pass1234
+      - POSTGRES_DB=tree-seg
   
   react:
     image: 'node:10.15.0'
@@ -19,7 +23,7 @@ services:
 
   flask:
     depends_on:
-      - 'mongo'
+      - 'database'
     image: 'python:3.6.8'
     entrypoint: app/entrypoint.sh
     command: flask run --host=0.0.0.0 --port=5000
@@ -28,4 +32,4 @@ services:
     volumes:
       - './flask:/app'
 volumes:
-  mongo-db:
+  db:

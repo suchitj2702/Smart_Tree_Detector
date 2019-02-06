@@ -8,4 +8,4 @@ WORKDIR /app
 COPY /flask .
 RUN ./post-install.sh
 COPY --from=react-builder /app/build ./react
-CMD gunicorn --bind 0.0.0.0:5000 wsgi:app
+CMD gunicorn --bind 0.0.0.0:5000 --log-level=info --timeout=900 wsgi:app

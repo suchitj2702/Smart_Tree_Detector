@@ -1,7 +1,11 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+migrations/
 *.py[cod]
 *$py.class
+
+# h5 models
+*.h5
 
 # C extensions
 *.so

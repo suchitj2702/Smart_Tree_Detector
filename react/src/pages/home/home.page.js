@@ -104,8 +104,8 @@ class HomePage extends Component {
         <Segment className="Login-box" color='teal' inverted raised>
           <header className="Home-header">
             <img src={logo} className="Home-logo" alt="logo" />
-            <h4 className="Home-heading">Tree Segmentation</h4>
-            <p className="Home-subheading">Let's segment some trees...</p>
+            <h4 className="Home-heading">Segmentation</h4>
+            <p className="Home-subheading">Let me segment Maps for you</p>
           </header>
           <Input className='Email-box' name='email' icon='at' type='email' iconPosition='left' placeholder='Email' size='big' fluid onChange={this.handleInputChange}/>
           <Input name='password' icon='key' type='password' iconPosition='left' placeholder='Password' size='big' value={this.state.password} fluid onChange={this.handleInputChange} />
