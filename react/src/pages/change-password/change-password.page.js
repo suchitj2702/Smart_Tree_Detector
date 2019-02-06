@@ -46,6 +46,7 @@ class ChangePasswordPage extends Component {
 
     if (password !== confirmPass) {
       this.showError('Passwords do not match');
+      return false;
     }
 
     return true;
