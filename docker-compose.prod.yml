@@ -2,15 +2,13 @@ version: '3'
 
 services:
   database:
-    image: 'postgres:11'
+    image: 'kartoza/postgis:latest'
     ports:
       - '5432:5432'
     volumes:
       - 'db:/var/lib/postgresql/data'
     environment:
-      - POSTGRES_USER=docker
-      - POSTGRES_PASSWORD=pass1234
-      - POSTGRES_DB=tree-seg
+      - POSTGRES_DBNAME=tree-seg
 
   flask:
     depends_on:

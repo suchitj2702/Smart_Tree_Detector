@@ -1,8 +1,11 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-migrations/
+migrations/__pycache__/
 *.py[cod]
 *$py.class
+
+# DB version history
+migrations/versions/*.py
 
 # h5 models
 *.h5

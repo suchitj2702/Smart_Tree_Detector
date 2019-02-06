@@ -30,7 +30,7 @@ def process_image(path):
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_IN_MB * 1024 * 1024
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://docker:pass1234@database:5432/tree-seg'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://docker:docker@database:5432/tree-seg'
 CORS(app)
 db.init_app(app)
 
