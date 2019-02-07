@@ -5,6 +5,7 @@ import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from models import db, User
+import maskrcnninferencetemp as model_processor
 
 # Config
 
@@ -31,7 +32,7 @@ app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_IN_MB * 1024 * 1024
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://docker:docker@database:5432/tree-seg'
-CORS(app)
+CORS(app, headers='Content-Type')
 db.init_app(app)
 
 # API Routes
@@ -91,39 +92,69 @@ def change_password():
     return jsonify(success=True)
 
 
-## Process and Post Data
+## Process
 
 @app.route('/api/process', methods=['POST'])
 def process():
     data = request.get_json()
-    db_doc = dict()
-    db_doc["title"] = data["title"]
-    db_doc["description"] = data["description"]
-    db_doc["user"] = data["email"]
-    seg_objs_selection = data["options"]
-    image_name = data["image"]
+    user = User.query.filter_by(email=data["email"]).first()
+    if user == None:
+        return jsonify(success=False, error="User not found")
+    selection = 0
+    if data["buildings"] == "true":
+        if data["trees"] == "true":
+            selection = 2
+        else:
+            selection = 1
+    # Create dir for image set
+    dirname = str(user.id) + '_' + str(int(time.time()))
+    dirpath = os.path.join(UPLOAD_FOLDER, dirname)
+    os.mkdir(dirpath, 0o777)
+    for f in data['uploadImages']:
+        os.rename(os.path.join(UPLOAD_FOLDER, f), os.path.join(dirpath, f))
     # processing
     app.logger.info("Processing begins ...")
+    trees, buildings = model_processor.main(dirpath, selection)
     app.logger.info("Processing ends !")
-    db_doc["coords"] = None # Output JSON
-    db_doc["count"] = None
-    mongo.db.geo.insert_one(db_doc)
+    return jsonify(success=True, trees=trees, buildings=buildings, imageSetId=dirname)
+
+
+## Store Data
+
+@app.route('/api/store', methods=['POST'])
+def store():
+    data = request.get_json()
+    area = data["area"]
+    notes = data["notes"]
+    trees = data["trees"]
+    buildings = data["buildings"]
+    user = User.query.filter_by(email=data["email"]).first()
+    if user == None:
+        return jsonify(success=False, error="User not found")
+    dirname = data["imageSetId"]
+    dirpath = os.path.join(UPLOAD_FOLDER, dirname, 'inferred')
+    # TODO: Retrieve Coords
+    # TODO: Merge Coords if merge enabled and close enough geographies
+    #       else store coords
     return jsonify(success=True)
 
-## GET data
-@app.route('/api/data', methods=['POST'])
-def show():
-    user = request.get_json()["email"]
-    data = mongo.db.geo.find({'user': user}, {'_id': False, 'coords': False})
-    return jsonify(data=data)
-    
+
+## Delete unused data
+
+@app.route('/api/clean', methods=['POST'])
+def clean():
+    data = request.get_json()
+    dirname = data["imageSetId"]
+    dirpath = os.path.join(UPLOAD_FOLDER, dirname)
+    os.remove(dirpath)
+    return jsonify(success=True)
 
 ## Fetch list of uploads
-
 @app.route('/api/list', methods=['POST'])
 def list_uploads():
     data = request.get_json()
     email = data['email']
+    # TODO: Update Query
     list_of_uploads = mongo.db.uploads.find({ "user": email.lower()}, ["_id", "title"])
     return jsonify(data=list_of_uploads)
 

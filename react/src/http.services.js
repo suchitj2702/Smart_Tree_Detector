@@ -25,4 +25,9 @@ function getUploadLink() {
     return uploadPath
 }
 
-export { login, signup, resetPassword, getUploadLink };
+async function processImage(email, buildings, trees, uploadImages) {
+    const result = await axios.post(`${BASE_URL}/process`, { email, buildings, trees, uploadImages });
+    return result.data;
+}
+
+export { login, signup, resetPassword, getUploadLink, processImage };

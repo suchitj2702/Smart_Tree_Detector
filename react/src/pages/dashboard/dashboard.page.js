@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import './dashboard.page.css';
-import { getUploadLink } from '../../http.services'
+import { getUploadLink, processImage } from '../../http.services'
 
 // Semantic-UI elements
-import { Segment, Button, Dropdown, Menu, Header, Icon, Modal, Input, TextArea, Form, Label, Checkbox } from 'semantic-ui-react';
+import { Segment, Button, Dropdown, Menu, Header, Icon, Modal, Form, Label, Checkbox } from 'semantic-ui-react';
 
 // Filepond
-import { FilePond, File, registerPlugin } from 'react-filepond';
+import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
 
 // Filepond extensions
@@ -21,7 +21,7 @@ registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
 class DashboardPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {error: null, errorVisibility: false, loading: false, toggle: [true, false]};
+    this.state = {error: null, errorVisibility: false, loading: false, toggle: [true, false], images: [], open: false};
   }
 
   handleInputChange = (maxlength, event) => {
@@ -35,6 +35,14 @@ class DashboardPage extends Component {
     }
   }
 
+  handleOpen = () => {
+    this.setState({ open: true });
+  }
+
+  handleClose = () => {
+    this.setState({ open: false });
+  }
+
   handleToggles = (toggleId) => {
     const toggleCollection = this.state.toggle;
     toggleCollection[toggleId] = !toggleCollection[toggleId]
@@ -46,7 +54,11 @@ class DashboardPage extends Component {
   }
 
   handleSubmission = () => {
-    console.log(this.state);
+    const { toggle, images } = this.state;
+    const email = this.props.user;
+    const imageIds = images.map(image => image.serverId)
+    processImage(email, toggle[1], toggle[0], imageIds);
+    this.handleClose();
   }
 
   handleLogout = () => {
@@ -68,14 +80,12 @@ class DashboardPage extends Component {
             <Header icon='dashboard' content='Dashboard' inverted as='h1' />
           </Menu.Header>
           <Menu.Menu position='right'>
-            <Modal trigger={<Menu.Item name='home'><Icon name='plus' /></Menu.Item>} closeIcon>
+            <Menu.Item name='home' onClick={this.handleOpen}><Icon name='plus' /></Menu.Item>
+            <Modal open={this.state.open} onClose={this.handleClose} closeIcon>
               <Modal.Header>Upload an Image</Modal.Header>
               <Modal.Content>
                 <Modal.Description>
-                  <Input name="title" label='Title:' size='big' fluid value={this.state.title} onChange={this.handleInputChange.bind(this, 50)}/>
                   <Form className='Upload-text'>
-                    <Label>Description</Label>
-                    <TextArea name='description' placeholder='Give us a brief description [optional]' value={this.state.description} onChange={this.handleInputChange.bind(this, 250)} />
                     <Form.Field>
                       <Checkbox toggle label='Trees' checked={this.state.toggle[0]} onChange={this.handleToggles.bind(this, 0)}/>
                     </Form.Field>
@@ -83,7 +93,15 @@ class DashboardPage extends Component {
                       <Checkbox toggle label='Buildings' checked={this.state.toggle[1]} onChange={this.handleToggles.bind(this, 1)}/>
                     </Form.Field>
                   </Form>
-                  <FilePond className="Filepond-custom" allowMultiple={false} maxFiles={1} server={getUploadLink()}/>
+                  <FilePond className="Filepond-custom"
+                    files={this.state.images} 
+                    allowMultiple={true}
+                    maxFiles={20}
+                    server={getUploadLink()}
+                    onupdatefiles={ (fileItems) => {
+                      this.setState({ images: fileItems.map(fileItem => fileItem) });
+                    }}>
+                    </FilePond>
                   <Button content='Submit' primary onClick={this.handleSubmission}/>
                 </Modal.Description>
               </Modal.Content>

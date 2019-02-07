@@ -6,8 +6,9 @@ from mrcnn import model as modellib
 import os
 import json
 import pandas as pd
+import exifread
 
-selection = 2
+selection = 2 # 0: tree 1: building 2: both
 TEST_IMAGE = "test.jpg"
 LOGS_FOLDER = "logs"
 PRETRAINED_COCO_WEIGHTS = "mask_rcnn_coco.h5"
@@ -31,7 +32,7 @@ configtree.display()
 class InferenceConfigbuilding(maskrcnntrain.trainingconfig):
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
-    DETECTION_MIN_CONFIDENCE = 0.85
+    DETECTION_MIN_CONFIDENCE = 0.8
 
 configbuilding = InferenceConfigbuilding()
 print('Building Detection Config....')
@@ -74,7 +75,9 @@ else:
     tree_weights_path = TRAINED_MASKRCNN_TREE_WEIGHTS
     building_weights_path = TRAINED_MASKRCNN_BUILDINGS_WEIGHTS
     model_tree.load_weights(tree_weights_path, by_name=True)
+    model_tree.keras_model._make_predict_function()
     model_building.load_weights(building_weights_path, by_name=True)
+    model_building.keras_model._make_predict_function()
     class_names_tree = CLASS_TREE
     class_names_building = CLASS_BUILDING
 
@@ -124,12 +127,31 @@ def display_instances(image, boxes, masks, ids, names, scores, color):
 
     return image, n_instances
 
-def main():
+def degress(tag):
+    d = float(tag.values[0].num) / float(tag.values[0].den)
+    m = float(tag.values[1].num) / float(tag.values[1].den)
+    s = float(tag.values[2].num) / float(tag.values[2].den)
+    return d + (m / 60.0) + (s / 3600.0)
+
+def main(image_dir=IMG_DIR, selection=0):
     total_trees = 0
     total_buildings = 0
-    for filename in os.listdir(IMG_DIR):
+    inferred_dir = os.path.join(image_dir, "inferred")
+    os.mkdir(inferred_dir, 0o777)
+    files = os.listdir(image_dir)
+    files.remove('inferred')
+    for filename in files:
+        with open(os.path.join(image_dir,filename), 'rb') as f:
+            tags = exifread.process_file(f)
+        lat = degress(tags["GPS GPSLatitude"])
+        lon = degress(tags["GPS GPSLongitude"])
+        latitude = -lat if tags["GPS GPSLatitudeRef"].values[0]!='N' else lat
+        longitude = -lon if tags["GPS GPSLatitudeRef"].values[0]!='E' else lon
+
+        print("Latitude[deg]  : %f" % latitude)
+        print("Longitude[deg] : %f" % longitude)
         if selection == 0:
-            test_image = cv2.imread(os.path.join(IMG_DIR,filename))
+            test_image = cv2.imread(os.path.join(image_dir,filename))
             results = model_tree.detect([test_image], verbose = 0)
             r = results[0]
             infered, number_of_instances = display_instances(
@@ -137,8 +159,9 @@ def main():
             )
             print(number_of_instances)
             total_trees = total_trees + number_of_instances
+            total_buildings = 'NA'
         elif selection == 1:
-            test_image = cv2.imread(os.path.join(IMG_DIR,filename))
+            test_image = cv2.imread(os.path.join(image_dir,filename))
             results = model_building.detect([test_image], verbose = 0)
             r = results[0]
             infered, number_of_instances = display_instances(
@@ -146,8 +169,9 @@ def main():
             )
             print(number_of_instances)
             total_buildings = total_buildings + number_of_instances
+            total_trees = 'NA'
         else:
-            test_image = cv2.imread(os.path.join(IMG_DIR,filename))
+            test_image = cv2.imread(os.path.join(image_dir,filename))
             temp = test_image
             results = model_tree.detect([test_image], verbose = 0)
             r = results[0]
@@ -156,7 +180,7 @@ def main():
             )
             print('Saved')
             cv2.imwrite('temp.jpg', temp)
-            test_image = cv2.imread(os.path.join(IMG_DIR,filename))
+            test_image = cv2.imread(os.path.join(image_dir,filename))
             results = model_building.detect([test_image], verbose = 0)
             r = results[0]
             infered, number_of_building_instances = display_instances(
@@ -166,10 +190,10 @@ def main():
             total_buildings = total_buildings + number_of_building_instances
             print("Number of trees detected: " + str(number_of_tree_instances))
             print("Number of buildings detected: " + str(number_of_building_instances))
-        cv2.imwrite(os.path.join(INFERED_DIR,filename), infered)
-
+        cv2.imwrite(os.path.join(inferred_dir, filename), infered)
     print("Total trees detected: " + str(total_trees))
     print("Total buildings detected: " + str(total_buildings))
+    return total_trees, total_buildings
 
 if __name__ == "__main__":
     main()

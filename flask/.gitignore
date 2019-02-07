@@ -4,12 +4,6 @@ migrations/__pycache__/
 *.py[cod]
 *$py.class
 
-# DB version history
-migrations/versions/*.py
-
-# h5 models
-*.h5
-
 # C extensions
 *.so
 
@@ -114,5 +108,10 @@ venv.bak/
 uploads/**
 !uploads/README.md
 
-# virtualenv
-ENV/
+
+# DB version history
+migrations/versions/**
+!migrations/versions/README.md
+
+# h5 models
+*.h5

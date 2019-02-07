@@ -10,6 +10,7 @@ Cython==0.28.3
 dask==0.17.5
 decorator==4.3.0
 entrypoints==0.2.3
+ExifRead==2.1.2
 Flask_Cors==3.0.7
 Flask==1.0.2
 Flask-Script==2.0.6
