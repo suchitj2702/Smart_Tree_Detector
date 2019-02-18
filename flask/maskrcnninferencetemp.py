@@ -133,13 +133,11 @@ def degress(tag):
     s = float(tag.values[2].num) / float(tag.values[2].den)
     return d + (m / 60.0) + (s / 3600.0)
 
-def main(image_dir=IMG_DIR, selection=0):
+def main(image_dir=IMG_DIR, selection=0, inferred_dir=None):
+    # Input Directory and output Directory should not have any sub-directories
     total_trees = 0
     total_buildings = 0
-    inferred_dir = os.path.join(image_dir, "inferred")
-    os.mkdir(inferred_dir, 0o777)
     files = os.listdir(image_dir)
-    files.remove('inferred')
     for filename in files:
         with open(os.path.join(image_dir,filename), 'rb') as f:
             tags = exifread.process_file(f)
@@ -179,7 +177,6 @@ def main(image_dir=IMG_DIR, selection=0):
                 test_image, r['rois'], r['masks'], r['class_ids'], class_names_tree, r['scores'], [255, 128, 0]
             )
             print('Saved')
-            cv2.imwrite('temp.jpg', temp)
             test_image = cv2.imread(os.path.join(image_dir,filename))
             results = model_building.detect([test_image], verbose = 0)
             r = results[0]
@@ -193,7 +190,7 @@ def main(image_dir=IMG_DIR, selection=0):
         cv2.imwrite(os.path.join(inferred_dir, filename), infered)
     print("Total trees detected: " + str(total_trees))
     print("Total buildings detected: " + str(total_buildings))
-    return total_trees, total_buildings
+    return total_trees, total_buildings, latitude, longitude
 
 if __name__ == "__main__":
     main()

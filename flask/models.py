@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from geoalchemy2 import Geometry
 import datetime
 
 db = SQLAlchemy()
@@ -27,7 +28,7 @@ class BaseModel(db.Model):
         }
 
 class User(BaseModel, db.Model):
-    """Model for the users table"""
+    """Model for the users"""
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key = True)
@@ -37,3 +38,34 @@ class User(BaseModel, db.Model):
     def __init__(self, email=None, password=None):
         self.email = email
         self.password = password
+
+class City(BaseModel, db.Model):
+    """Model for the counting output of particular city"""
+    __tablename__ = 'cities'
+
+    id = db.Column(db.Integer, primary_key = True)
+    label = db.Column(db.String(50))
+    description = db.Column(db.String(130))
+    user_id = db.Column(db.Integer, nullable=False)
+    longitude = db.Column(db.Float)
+    latitude = db.Column(db.Float)
+    geo = db.Column(Geometry(geometry_type="POINT"))
+    trees = db.Column(db.Integer)
+    buildings = db.Column(db.Integer)
+
+    def __init__(self, user_id, latitude, longitude, label, description='NA', no_of_trees=-1, no_of_buildings=-1):
+        self.user_id = user_id
+        self.latitude = latitude
+        self.longitude = longitude
+        self.label = label
+        self.description = description
+        self.geo = f'POINT({longitude} {latitude})'
+        self.trees = no_of_trees
+        self.buildings = no_of_buildings
+
+    def update(self, latitude, longitude, no_of_trees, no_of_buildings):
+        self.latitude = latitude
+        self.longitude = longitude
+        self.geo = f'POINT({longitude} {latitude})'
+        self.trees = no_of_trees
+        self.buildings = no_of_buildings

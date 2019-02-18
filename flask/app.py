@@ -1,15 +1,18 @@
 import os
+import shutil
 import stat
 import time
 import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from models import db, User
+from models import db, User, City
 import maskrcnninferencetemp as model_processor
 
 # Config
 
 UPLOAD_FOLDER = "uploads"
+STATIC_FOLDER = "static"
+OUTPUT_FOLDER = "output"
 MAX_CONTENT_IN_MB = 16
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -101,8 +104,8 @@ def process():
     if user == None:
         return jsonify(success=False, error="User not found")
     selection = 0
-    if data["buildings"] == "true":
-        if data["trees"] == "true":
+    if data["buildings"]:
+        if data["trees"]:
             selection = 2
         else:
             selection = 1
@@ -114,9 +117,17 @@ def process():
         os.rename(os.path.join(UPLOAD_FOLDER, f), os.path.join(dirpath, f))
     # processing
     app.logger.info("Processing begins ...")
-    trees, buildings = model_processor.main(dirpath, selection)
-    app.logger.info("Processing ends !")
-    return jsonify(success=True, trees=trees, buildings=buildings, imageSetId=dirname)
+    output_dir = os.path.join(STATIC_FOLDER, OUTPUT_FOLDER, dirname)
+    os.mkdir(output_dir, 0o777)
+    try:
+        trees, buildings, latitude, longitude = model_processor.main(dirpath, selection, output_dir)
+        shutil.rmtree(dirpath)
+        app.logger.info("Processing ends !")
+        return jsonify(success=True, trees=trees, buildings=buildings, imageSetId=dirname, latitude=latitude, longitude=longitude)
+    except:
+        shutil.rmtree(dirpath)
+        shutil.rmtree(output_dir)
+        return jsonify(success=False)
 
 
 ## Store Data
@@ -124,18 +135,25 @@ def process():
 @app.route('/api/store', methods=['POST'])
 def store():
     data = request.get_json()
-    area = data["area"]
-    notes = data["notes"]
+    label = data["label"]
+    description = data["description"]
     trees = data["trees"]
     buildings = data["buildings"]
+    latitude = data["latitude"]
+    longitude = data["longitude"]
+    merge = data["merge"]
     user = User.query.filter_by(email=data["email"]).first()
     if user == None:
         return jsonify(success=False, error="User not found")
-    dirname = data["imageSetId"]
-    dirpath = os.path.join(UPLOAD_FOLDER, dirname, 'inferred')
-    # TODO: Retrieve Coords
-    # TODO: Merge Coords if merge enabled and close enough geographies
-    #       else store coords
+    new_city = City(user.id, latitude, longitude, label, description, trees, buildings)
+    closest_city = None
+    if merge:
+        pass
+    if closest_city is not None:
+        closest_city.merge(latitude, longitude, trees, buildings)
+    else:
+        db.session.add(new_city)
+    db.session.commit()    
     return jsonify(success=True)
 
 
@@ -145,18 +163,26 @@ def store():
 def clean():
     data = request.get_json()
     dirname = data["imageSetId"]
-    dirpath = os.path.join(UPLOAD_FOLDER, dirname)
-    os.remove(dirpath)
-    return jsonify(success=True)
+    dirpath = os.path.join(STATIC_FOLDER, OUTPUT_FOLDER, dirname)
+    try:
+        shutil.rmtree(dirpath)
+        return jsonify(success=True)
+    except:
+        return jsonify(success=False)
 
 ## Fetch list of uploads
 @app.route('/api/list', methods=['POST'])
 def list_uploads():
     data = request.get_json()
-    email = data['email']
-    # TODO: Update Query
-    list_of_uploads = mongo.db.uploads.find({ "user": email.lower()}, ["_id", "title"])
-    return jsonify(data=list_of_uploads)
+    user = User.query.filter_by(email=data["email"]).first()
+    if user == None:
+        return jsonify(success=False, error="User not found")
+    uploads = City.query.filter_by(user_id=user.id).all()
+    data = list()
+    for i in range(len(uploads)):
+        upload = uploads[i]
+        data.append({ "id": upload.id, "label": upload.label, "description": upload.description, "trees": upload.trees, "buildings": upload.buildings})
+    return jsonify(data=data)
 
 
 ## Upload an image
@@ -186,16 +212,23 @@ def upload():
         return 'Done'
 
 
-## ReactJS app serving
+## Static File serving along with support for SPA
+
+@app.route('/output/<string:image_set_id>/<string:image_file>')
+def serve_output(image_set_id, image_file):
+    path_dir = os.path.abspath(STATIC_FOLDER)
+    dirpath = os.path.join(path_dir, OUTPUT_FOLDER, image_set_id)
+    print(dirpath)
+    return send_from_directory(dirpath, image_file)
 
 @app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
-    path_dir = os.path.abspath("./react") # path to react build files
-    if path != "" and os.path.exists(os.path.join(path_dir, path)):
-        filename = path
+@app.route('/<path:file_path>')
+def serve(file_path):
+    path_dir = os.path.abspath(STATIC_FOLDER) # path to all static files that can be served
+    if file_path != "" and os.path.exists(os.path.join(path_dir, file_path)):
+        filename = file_path
         relative_path = ""
-        split_list = path.rsplit("/", 1)
+        split_list = file_path.rsplit("/", 1)
         if len(split_list) > 1:
             filename = split_list[1]
             relative_path = split_list[0]

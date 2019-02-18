@@ -8,7 +8,6 @@ pip install -r requirements.txt
 # TODO: Find a better alternative 
 sleep 2s
 
-python manage.py db migrate
 python manage.py db upgrade
 
 export FLASK_ENV=development

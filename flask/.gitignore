@@ -108,6 +108,9 @@ venv.bak/
 uploads/**
 !uploads/README.md
 
+# static
+static/**
+!static/README.md
 
 # DB version history
 migrations/versions/**

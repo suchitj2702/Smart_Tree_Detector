@@ -1,0 +1,39 @@
+.Password {
+  background-image: url("../../assets/prism.png");
+  min-height: 100vh;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 10vh;
+}
+
+.Password-header {
+  font-size: calc(10px + 2vmin);
+  color: white;
+  text-align: center;
+  padding-top: 5px;
+  margin-bottom: 20px;
+  background-color: #00b5ad!important;
+}
+
+.Password-heading {
+  margin-bottom: 10px;
+}
+
+.Password-subheading {
+  margin-top: 0;
+}
+
+.Change-password-box {
+  width: 945px;
+}
+
+.Message-box {
+  width: 30vmin;
+}
+
+.Old-password-box {
+  margin-bottom: 10px;
+}
