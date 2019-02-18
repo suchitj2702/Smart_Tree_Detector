@@ -35,7 +35,9 @@ async function processImage(email, buildings, trees, uploadImages) {
     return result.data;
 }
 
-async function saveData(email, trees, buildings, latitude, longitude, label, merge, description) {
+async function saveData(email, treeVal, buildingVal, latitude, longitude, label, merge, description) {
+    const trees = treeVal === 'NA' ? -1: treeVal;
+    const buildings = buildingVal === 'NA' ? -1: buildingVal;
     const result = await axios.post(`${BASE_API_URL}/store`, { email, buildings, trees, latitude, longitude, label, merge, description });
     return result.data;
 }

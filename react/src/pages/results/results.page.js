@@ -100,9 +100,9 @@ class ResultsPage extends Component {
           <Image.Group size='medium' children={this.getImages()} />
           <Header as='h3'>Additional Details</Header>
           <Input className='Old-password-box' name='locationName' type='text' placeholder='Location Name' size='big' value={this.state.locationName} fluid onChange={this.handleInputChange.bind(this, 50)}/>
-          {/* <Popup 
+          <Popup 
             trigger={<Checkbox toggle floated='left' label='Merge' checked={this.state.merge} onChange={this.handleMergeToggle}/>}
-          content='Finds and updates the location closest to the above(max dist b/w the two can be 25 km)' /> */}
+            content='Finds and updates the location closest to the above(max dist b/w the two can be 25 km)' />
           <Form style={{padding: '10px 0 10px 0'}}>
             <TextArea name='description' placeholder='Tell us more (optional)' style={{ minHeight: 150 }} value={this.state.description} onChange={this.handleInputChange.bind(this, 130)}/>
           </Form>

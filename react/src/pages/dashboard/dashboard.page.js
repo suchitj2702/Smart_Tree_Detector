@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Redirect, Link } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import './dashboard.page.css';
 import { getUploadLink, processImage, clean, getList } from '../../http.services'
 
@@ -48,8 +48,8 @@ class DashboardPage extends Component {
     let i;
     const items = [];
     for(i = 0; i < this.state.uploads.length; i+= 1) {
-      const { id, label, description, trees, buildings } = this.state.uploads[i];
-      items.push({ childKey: id, header: label, meta: `Trees: ${trees} Buildings: ${buildings}`, description});
+      let { id, label, description, trees, buildings } = this.state.uploads[i];
+      items.push({ childKey: id, header: label, meta: `Trees: ${trees === -1 ? 'NA': trees} Buildings: ${buildings === -1 ? 'NA': buildings}`, description});
     }
     return items;
   }

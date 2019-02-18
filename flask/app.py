@@ -5,6 +5,7 @@ import time
 import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from geopy import distance
 from models import db, User, City
 import maskrcnninferencetemp as model_processor
 
@@ -148,9 +149,15 @@ def store():
     new_city = City(user.id, latitude, longitude, label, description, trees, buildings)
     closest_city = None
     if merge:
-        pass
+        all_user_cities = City.query.filter_by(user_id=user.id).all()
+        max_dist = 25 # in Km
+        for city in all_user_cities:
+            dist = distance.distance((city.latitude, city.longitude), (latitude, longitude)).kilometers
+            if (dist < max_dist):
+                max_dist = dist
+                closest_city = city
     if closest_city is not None:
-        closest_city.merge(latitude, longitude, trees, buildings)
+        closest_city.update(latitude, longitude, trees, buildings)
     else:
         db.session.add(new_city)
     db.session.commit()    
