@@ -12,5 +12,7 @@ pip install gunicorn
 sleep 2s
 
 # Necessary Migrations
-python manage.py db migrate
 python manage.py db upgrade
+
+# Run following command in container to generate version files
+# python manage.py db migrate
