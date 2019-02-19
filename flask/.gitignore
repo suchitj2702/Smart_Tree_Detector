@@ -109,8 +109,7 @@ uploads/**
 !uploads/README.md
 
 # static
-static/**
-!static/output/README.md
+static/!output
 
 # DB version history
 migrations/versions/**
