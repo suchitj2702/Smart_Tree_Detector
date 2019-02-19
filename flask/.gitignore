@@ -110,7 +110,6 @@ uploads/**
 
 # static
 static/**
-!static/README.md
 !static/output/README.md
 
 # DB version history

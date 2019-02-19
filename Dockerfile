@@ -6,6 +6,6 @@ RUN npm install && npm run build
 FROM python:3.6.8  
 WORKDIR /app
 COPY /flask .
-RUN ./post-install.sh
+RUN ./pre-install.sh
 COPY --from=react-builder /app/build ./static
-CMD gunicorn --bind 0.0.0.0:5000 --log-level=info --timeout=900 wsgi:app
+CMD ./run.sh

@@ -228,7 +228,7 @@ def serve_output(image_set_id, image_file):
     print(dirpath)
     return send_from_directory(dirpath, image_file)
 
-@app.route('/', defaults={'path': ''})
+@app.route('/', defaults={'file_path': ''})
 @app.route('/<path:file_path>')
 def serve(file_path):
     path_dir = os.path.abspath(STATIC_FOLDER) # path to all static files that can be served
