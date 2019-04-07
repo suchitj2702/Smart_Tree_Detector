@@ -26,7 +26,11 @@ Use ```Ctrl+C```
 
 ## The User Interface
 The landing page prompts the user to first signup (or signin) and then upload images (single or multiple) as shown: (The uploaded images must have the GPS data as its meta data)
-
+![](screenshots/step1.png)
+![](screenshots/step2.png)
+![](screenshots/step3.png)
+![](screenshots/step4.png)
+![](screenshots/step5.png)
 Once uploaded the user can choose to either test the tree detection algorithm, building detection algorithm or both. (The building detection stage is still in beta stage)
 
 The processing usually takes 1-2 minutes per image to process on a CPU based server.
