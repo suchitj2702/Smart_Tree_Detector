@@ -26,15 +26,18 @@ Use ```Ctrl+C```
 
 ## The User Interface
 The landing page prompts the user to first signup (or signin) and then upload images (single or multiple) as shown: (The uploaded images must have the GPS data as its meta data)
+
 ![](screenshots/step1.png)
 ![](screenshots/step2.png)
 ![](screenshots/step3.png)
 ![](screenshots/step4.png)
 ![](screenshots/step5.png)
 Once uploaded the user can choose to either test the tree detection algorithm, building detection algorithm or both. (The building detection stage is still in beta stage). The processing usually takes 1-2 minutes per image to process on a CPU based server.
+
 ![](screenshots/step6.png)
 ![](screenshots/step7.png)
 Once processed the result is shown as follows.
+
 ![](screenshots/step8.png)
 ![](screenshots/step9.png)
 The images are clustered together according to the geolocation area they belong to, for representational purposes. The tree count, geolocation and date-time of processing for each image is saved for the signed in user. (To be used for comparision purposes)
@@ -44,3 +47,6 @@ Tree segmentation is carried out for a given area at different points in time an
 * The received instance is classified as either an image or an orthomosaic map whereby in the latter case, the instance is further divided into smaller images. 
 * Tree segmentation and instance counting is achieved using a Mask R-CNN based object detector. 
 * Data comparison metrics are provided to compare the tree cover statistics in a particular area. This is achieved using the image’s Ground Sampling Distance (GSD) computed using its 3D position data, camera parameters.
+
+## Dataset
+One of the driving motives for us in the project was to successfully train a model on our custom dataset, which consists of thousands of aerial images, collected over various Indian settings. A small subset of the dataset was annotated, using it as the training set.
