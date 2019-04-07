@@ -31,14 +31,14 @@ The landing page prompts the user to first signup (or signin) and then upload im
 ![](screenshots/step3.png)
 ![](screenshots/step4.png)
 ![](screenshots/step5.png)
-Once uploaded the user can choose to either test the tree detection algorithm, building detection algorithm or both. (The building detection stage is still in beta stage)
-
-The processing usually takes 1-2 minutes per image to process on a CPU based server.
-
+Once uploaded the user can choose to either test the tree detection algorithm, building detection algorithm or both. (The building detection stage is still in beta stage). The processing usually takes 1-2 minutes per image to process on a CPU based server.
+![](screenshots/step6.png)
+![](screenshots/step7.png)
 Once processed the result is shown as follows.
-
+![](screenshots/step8.png)
+![](screenshots/step9.png)
 The images are clustered together according to the geolocation area they belong to, for representational purposes. The tree count, geolocation and date-time of processing for each image is saved for the signed in user. (To be used for comparision purposes)
-
+![](screenshots/step10.png)
 ## How does it work?
 Tree segmentation is carried out for a given area at different points in time and the corresponding results are compared. The approach consists of three stages:
 * The received instance is classified as either an image or an orthomosaic map whereby in the latter case, the instance is further divided into smaller images. 
