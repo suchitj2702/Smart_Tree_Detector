@@ -41,6 +41,7 @@ Once processed the result is shown as follows.
 ![](screenshots/step8.png)
 ![](screenshots/step9.png)
 The images are clustered together according to the geolocation area they belong to, for representational purposes. The tree count, geolocation and date-time of processing for each image is saved for the signed in user. (To be used for comparision purposes)
+
 ![](screenshots/step10.png)
 ## How does it work?
 Tree segmentation is carried out for a given area at different points in time and the corresponding results are compared. The approach consists of three stages:
